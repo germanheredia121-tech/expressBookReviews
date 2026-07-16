@@ -1,4 +1,5 @@
 curl -X PUT http://localhost:5000/customer/auth/review/1 \
 -H "Content-Type: application/json" \
--d '{"review":"Excelente libro"}'
-{"message":"Review added successfully"}
+-d '{"review":"Great book"}' \
+-b cookie.txt -c cookie.txt
+{"message":"Review added successfully","reviews":{"Great book":"Great book"}}

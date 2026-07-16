@@ -1,2 +1,2 @@
 curl http://localhost:5000/review/1
-{"isbn":"1","reviews":{"Excelente libro":"Excelente libro"}}
+{"isbn":"1","reviews":{"Great book":"Great book"}}

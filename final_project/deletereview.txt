@@ -1,4 +1,5 @@
-curl -X DELETE http://localhost:5000/customer/auth/review/1
-{
-  "review": "Excelente libro"
-}
+curl -X DELETE http://localhost:5000/customer/auth/review/1 \
+-H "Content-Type: application/json" \
+-d '{"review":"Great book"}' \
+-b cookie.txt -c cookie.txt
+{"message":"Review deleted successfully","reviews":{}}

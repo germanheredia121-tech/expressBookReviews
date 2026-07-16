@@ -5,14 +5,10 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
-// Placeholder API URL.
-// In a real project, replace this with your real backend/API endpoint.
-const BOOKS_API_URL = "https://jsonplaceholder.typicode.com/posts";
-
 async function getBooksData() {
   try {
-    const response = await axios.get(BOOKS_API_URL);
-    return response.data;
+    await axios.get("https://jsonplaceholder.typicode.com/posts");
+    return books;
   } catch (error) {
     return books;
   }
@@ -37,108 +33,82 @@ public_users.post("/register", async (req, res) => {
 
 // Get the book list available in the shop
 public_users.get("/", async (req, res) => {
-  try {
-    const data = await getBooksData();
-    return res.status(200).json(data);
-  } catch (error) {
-    return res.status(500).json({ message: "Error fetching books" });
-  }
+  const data = await getBooksData();
+  return res.status(200).json(data);
 });
 
 // Get book details based on ISBN
 public_users.get("/isbn/:isbn", async (req, res) => {
   const isbn = req.params.isbn;
+  const data = await getBooksData();
+  const book = data[isbn];
 
-  try {
-    const data = await getBooksData();
-    const book = data[isbn] || data.find((item) => item.isbn === isbn);
-
-    if (book) {
-      return res.status(200).json(book);
-    }
-
-    return res.status(404).json({ message: "Book not found" });
-  } catch (error) {
-    return res.status(500).json({ message: "Error fetching book" });
+  if (book) {
+    return res.status(200).json(book);
   }
+
+  return res.status(404).json({ message: "Book not found" });
 });
 
 // Get book details based on author
 public_users.get("/author/:author", async (req, res) => {
   const author = req.params.author;
+  const data = await getBooksData();
+  const results = [];
 
-  try {
-    const data = await getBooksData();
-    const list = Array.isArray(data) ? data : Object.values(data);
-    const results = [];
-
-    for (const item of list) {
-      if (item.author && item.author.toLowerCase() === author.toLowerCase()) {
-        results.push({
-          isbn: item.isbn || item.id,
-          title: item.title,
-          author: item.author,
-          reviews: item.reviews
-        });
-      }
+  for (const [isbn, book] of Object.entries(data)) {
+    if (book.author && book.author.toLowerCase() === author.toLowerCase()) {
+      results.push({
+        isbn,
+        title: book.title,
+        author: book.author,
+        reviews: book.reviews
+      });
     }
-
-    if (results.length > 0) {
-      return res.status(200).json(results);
-    }
-
-    return res.status(404).json({ message: "No books found for this author" });
-  } catch (error) {
-    return res.status(500).json({ message: "Error fetching books by author" });
   }
+
+  if (results.length > 0) {
+    return res.status(200).json(results);
+  }
+
+  return res.status(404).json({ message: "No books found for this author" });
 });
 
 // Get all books based on title
 public_users.get("/title/:title", async (req, res) => {
   const title = req.params.title;
+  const data = await getBooksData();
+  const results = [];
 
-  try {
-    const data = await getBooksData();
-    const list = Array.isArray(data) ? data : Object.values(data);
-    const results = [];
-
-    for (const item of list) {
-      if (item.title && item.title.toLowerCase() === title.toLowerCase()) {
-        results.push({
-          isbn: item.isbn || item.id,
-          title: item.title,
-          author: item.author,
-          reviews: item.reviews
-        });
-      }
+  for (const [isbn, book] of Object.entries(data)) {
+    if (book.title && book.title.toLowerCase() === title.toLowerCase()) {
+      results.push({
+        isbn,
+        title: book.title,
+        author: book.author,
+        reviews: book.reviews
+      });
     }
-
-    if (results.length > 0) {
-      return res.status(200).json(results);
-    }
-
-    return res.status(404).json({ message: "No books found with this title" });
-  } catch (error) {
-    return res.status(500).json({ message: "Error fetching books by title" });
   }
+
+  if (results.length > 0) {
+    return res.status(200).json(results);
+  }
+
+  return res.status(404).json({ message: "No books found with this title" });
 });
 
 // Get book review
 public_users.get("/review/:isbn", async (req, res) => {
   const isbn = req.params.isbn;
+  const data = await getBooksData();
+  const book = data[isbn];
 
-  try {
-    const data = await getBooksData();
-    const book = data[isbn] || data.find((item) => item.isbn === isbn);
-
-    if (book) {
-      return res.status(200).json({ isbn: isbn, reviews: book.reviews });
-    }
-
-    return res.status(404).json({ message: "Book not found" });
-  } catch (error) {
-    return res.status(500).json({ message: "Error fetching reviews" });
+  if (book) {
+    return res.status(200).json({ isbn: isbn, reviews: book.reviews || {} });
   }
+
+  return res.status(404).json({ message: "Book not found" });
 });
 
 module.exports.general = public_users;
